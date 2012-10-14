@@ -30,8 +30,13 @@
     font-size: 1.3em;
 }
 
-#message strong {
+#message a {
     color: #0bf;
+    font-weight: bold;
+}
+
+#message a:hover {
+    text-decoration: underline;
 }
 
 .blur {

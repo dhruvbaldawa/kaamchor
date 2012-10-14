@@ -5,9 +5,9 @@ var PREFIX = "restrict_facebook_";
 var HTML = '\
 <div id="overlay">\
   <div id="message">\
-    <h1>{name}, get some work done !</h1>\
+    <h1>{title}</h1>\
     <p>{message}</p>\
-    <p>You have <strong>{n_friend_requests} friend requests</strong>, <strong>{n_messages} unread messages</strong> and <strong>{n_notifications} notifications</strong>.</p>\
+    <p>You have <a href="#">{n_friend_requests} friend requests</a>, <a href="#">{n_messages} unread messages</a> and <a href="#">{n_notifications} notifications</a>.</p>\
   </div>\
 </div>';
 
@@ -56,32 +56,62 @@ var overlay = {
 
 // Takes values from Facebook DOM and displays it to the user.
 var facebook = {
+    /**
+    * Returns the user's unread notifications.
+    */
     get_notifications: function() {
         return parseInt($("#notificationsCountValue").text());
     },
+    /**
+    * Returns the user's unread messages.
+    */
     get_messages: function() {
         return parseInt($("#mercurymessagesCountValue").text());
     },
+    /**
+    * Returns the user's unread friend requests.
+    */
     get_friend_requests: function() {
         return parseInt($("#requestsCountValue").text());
     },
+    /**
+    * Returns the user's name.
+    */
     get_name: function() {
         return $(".fbxWelcomeBoxName").text();
+    },
+    /**
+    * Returns the unread items on the user sidebar.
+    * @TODO: add error checking code.
+    */
+    get_sidebar_unread: function() {
+        return_obj = {};
+        $(".hasCount:visible").each(function(i) {
+            count = $(this).parent().prev().find('.countValue').text();
+            text = $(this).text();
+            return_obj[text] = count; 
+        });
+        return return_obj;
     }
 };
 
 function init() {
     values = {
-        'name': facebook.get_name().split(' ')[0],
-        'message': "Get a life, dude !",
+        'title': facebook.get_name().split(' ')[0] + ', why don\'t you do something meaningful ?',
+        'message': "I don't think its worth checking on Facebook right now.",
         'n_friend_requests': facebook.get_friend_requests(),
         'n_messages': facebook.get_messages(),
         'n_notifications': facebook.get_notifications()
     }
-    
+    // Get the dialog ready and show it !
     html = HTML.format(values);
     $("body").append(html);
     overlay.show();
+
+    // Let clicking on links hide the dialogs.
+    $("#overlay a").click(function() {
+        overlay.hide();
+    });
 }
 
 $(document).ready(function() {
