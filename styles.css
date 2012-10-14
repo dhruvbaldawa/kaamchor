@@ -10,6 +10,26 @@
     display: none;
 }
 
+#message {
+    top: 25%;
+    left: 25%;
+    position: fixed;
+    width: 50%;
+    background-color: #333;
+    opacity: 0.8;
+    color: #fff;
+    padding: 5px;
+}
+
+#message h1 {
+    font-size: 3em;
+    color: #0bf;
+}
+
+#message p {
+    font-size: 1.5em;
+}
+
 .blur {
     -webkit-filter: blur(3px);
 }
