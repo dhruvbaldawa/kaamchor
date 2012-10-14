@@ -33,10 +33,10 @@ var settings = {
 
 // Options for the extension.
 var options = {
-    delay: 15, // The delay before the overlay appears.
+    delay: 1*1000, // The delay before the overlay appears.
     strict: true, // If the user can close the dialog or not.
     messages: [], // The set of messages that the user might see.
-    interval: 500, // Interval to check in.
+    interval: 5000, // Interval to check in.
 }
 
 // Overlay object, for showing and hiding the overlay.
@@ -106,6 +106,11 @@ var facebook = {
     }
 };
 
+// Let clicking on links hide the dialogs.
+$("#overlay a").live('click', function() {
+    overlay.hide();
+});
+
 /**
 * The initialization function.
 **/
@@ -113,23 +118,36 @@ function init() {
     $("body").append("<div id=\"overlay\"></div>");
     overlay.update();
     overlay.show();
-    // Let clicking on links hide the dialogs.
-    $("#overlay a").click(function() {
-        overlay.hide();
-    });
 }
 
 /**
 * The function which is executed repetitively after every `interval`.
 **/
 function repeat() {
-    // Just don't do anything is the overlay is hidden.
+    // Check if user is just fooling around, when the overlay is hidden.
     if (!$("#overlay").is(":visible")) {
-        return;
+        n = facebook.get_notifications();
+        f = facebook.get_friend_requests();
+        m = facebook.get_messages();
+
+        // There is nothing to check. Update the timer, and show the overlay
+        // after the `delay`.
+        if (n + f + m == 0) {
+            setTimeout(function() {
+                overlay.update();
+                overlay.show();
+            }, options.delay);
+        }
     }
-    overlay.update();
+    // Update the overlay if its visible.
+    else {
+        overlay.update();
+    }
 }
 
 $(document).ready(function() {
     init();
+    setInterval(function() {
+        repeat();
+    }, options.interval);
 });
