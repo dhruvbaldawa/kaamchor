@@ -3,12 +3,10 @@ var PREFIX = "restrict_facebook_";
 
 // The overlay HTML template.
 var HTML = '\
-<div id="overlay">\
-  <div id="message">\
+<div id="message">\
     <h1>{title}</h1>\
     <p>{message}</p>\
     <p>You have <a href="#">{n_friend_requests} friend requests</a>, <a href="#">{n_messages} unread messages</a> and <a href="#">{n_notifications} notifications</a>.</p>\
-  </div>\
 </div>';
 
 /*
@@ -38,6 +36,7 @@ var options = {
     delay: 15, // The delay before the overlay appears.
     strict: true, // If the user can close the dialog or not.
     messages: [], // The set of messages that the user might see.
+    interval: 500, // Interval to check in.
 }
 
 // Overlay object, for showing and hiding the overlay.
@@ -51,6 +50,18 @@ var overlay = {
         $("#overlay").fadeOut("fast");
         $("._li").removeClass("blur");
         $(".uiGrid").removeClass("blur");
+    },
+    update: function () {
+        values = {
+            'title': facebook.get_name().split(' ')[0] + ', why don\'t you do something meaningful ?',
+            'message': "I don't think its worth checking on Facebook right now.",
+            'n_friend_requests': facebook.get_friend_requests(),
+            'n_messages': facebook.get_messages(),
+            'n_notifications': facebook.get_notifications()
+        };
+        // Get the dialog ready and show it !
+        html = HTML.format(values);
+        $("#overlay").html(html);
     }
 };
 
@@ -95,23 +106,28 @@ var facebook = {
     }
 };
 
+/**
+* The initialization function.
+**/
 function init() {
-    values = {
-        'title': facebook.get_name().split(' ')[0] + ', why don\'t you do something meaningful ?',
-        'message': "I don't think its worth checking on Facebook right now.",
-        'n_friend_requests': facebook.get_friend_requests(),
-        'n_messages': facebook.get_messages(),
-        'n_notifications': facebook.get_notifications()
-    }
-    // Get the dialog ready and show it !
-    html = HTML.format(values);
-    $("body").append(html);
+    $("body").append("<div id=\"overlay\"></div>");
+    overlay.update();
     overlay.show();
-
     // Let clicking on links hide the dialogs.
     $("#overlay a").click(function() {
         overlay.hide();
     });
+}
+
+/**
+* The function which is executed repetitively after every `interval`.
+**/
+function repeat() {
+    // Just don't do anything is the overlay is hidden.
+    if (!$("#overlay").is(":visible")) {
+        return;
+    }
+    overlay.update();
 }
 
 $(document).ready(function() {
